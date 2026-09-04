@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>أطلس الأحياء</title>
+<meta name="description" content="تطبيق لحفظ رسومات علم الأحياء بطريقة تفاعلية" />
+<meta name="theme-color" content="#1E2A1F" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div id="toast" class="toast" aria-live="polite"></div>
+<div id="loading-overlay" class="loading-overlay hidden">
+  <div class="spinner" aria-hidden="true"></div>
+  <p id="loading-text">جارٍ التحميل…</p>
+</div>
+
+<main id="app">
+
+  <!-- ======================= شاشة دخول الطالب (الشاشة الافتراضية) ======================= -->
+  <section id="screen-student-login" class="screen active">
+    <div class="brandmark">
+      <div class="brandmark-leaf" aria-hidden="true"></div>
+      <h1>أطلس الأحياء</h1>
+      <p class="tagline">تعلّم رسومات الأحياء بالتفاعل، لا بالحفظ الأعمى</p>
+    </div>
+
+    <form id="form-student-login" class="stack" autocomplete="off">
+      <label for="input-student-code" class="field-label">أدخل الكود الخاص بك</label>
+      <input id="input-student-code" name="code" class="input-code" type="text"
+             placeholder="مثال: BIO-7F3K2Q" maxlength="24" autocapitalize="characters"
+             autocomplete="off" spellcheck="false" required />
+      <button type="submit" class="btn btn-primary btn-block">دخول</button>
+      <p id="student-login-error" class="field-error" role="alert" hidden></p>
+    </form>
+
+    <button id="btn-open-teacher-login" class="link-quiet" type="button">دخول المعلم</button>
+  </section>
+
+  <!-- ======================= شاشة دخول المعلم ======================= -->
+  <section id="screen-teacher-login" class="screen">
+    <button class="btn-back" data-back-to="screen-student-login" type="button" aria-label="رجوع">‹ رجوع</button>
+    <div class="header-block">
+      <h1>دخول المعلم</h1>
+      <p class="tagline">هذه الواجهة محمية ولا يستطيع الطالب الوصول إليها</p>
+    </div>
+    <form id="form-teacher-login" class="stack" autocomplete="off">
+      <label for="input-teacher-email" class="field-label">البريد الإلكتروني</label>
+      <input id="input-teacher-email" name="email" class="input" type="email" required autocomplete="username" />
+      <label for="input-teacher-password" class="field-label">كلمة السر</label>
+      <input id="input-teacher-password" name="password" class="input" type="password" required autocomplete="current-password" />
+      <button type="submit" class="btn btn-primary btn-block">دخول</button>
+      <p id="teacher-login-error" class="field-error" role="alert" hidden></p>
+    </form>
+  </section>
+
+  <!-- ======================= لوحة المعلم الرئيسية ======================= -->
+  <section id="screen-teacher-dashboard" class="screen">
+    <header class="topbar">
+      <div>
+        <h1>لوحة المعلم</h1>
+        <p class="topbar-sub" id="teacher-email-label"></p>
+      </div>
+      <button id="btn-teacher-logout" class="btn btn-ghost btn-sm" type="button">تسجيل الخروج</button>
+    </header>
+
+    <nav class="section-tabs" role="tablist">
+      <button class="tab active" data-panel="panel-content" type="button" role="tab">المحتوى</button>
+      <button class="tab" data-panel="panel-codes" type="button" role="tab">أكواد الطلاب</button>
+      <button class="tab" data-panel="panel-settings" type="button" role="tab">الإعدادات</button>
+    </nav>
+
+    <!-- لوحة المحتوى: الصفوف -->
+    <div id="panel-content" class="panel active">
+      <div class="panel-toolbar">
+        <h2>الصفوف</h2>
+        <button id="btn-add-class" class="btn btn-primary btn-sm" type="button">+ إضافة صف</button>
+      </div>
+      <ul id="list-classes" class="specimen-list"></ul>
+      <p id="empty-classes" class="empty-state" hidden>لا توجد صفوف بعد. ابدأ بإضافة صف جديد.</p>
+
+      <div class="future-slot">
+        <span class="future-slot-label">أقسام إضافية</span>
+        <button class="btn btn-outline btn-sm" type="button" disabled>+ الاختبارات (قريباً)</button>
+      </div>
+    </div>
+
+    <!-- لوحة أكواد الطلاب -->
+    <div id="panel-codes" class="panel">
+      <div class="panel-toolbar">
+        <h2>أكواد الطلاب</h2>
+        <button id="btn-generate-code" class="btn btn-primary btn-sm" type="button">+ توليد كود جديد</button>
+      </div>
+      <ul id="list-codes" class="specimen-list"></ul>
+      <p id="empty-codes" class="empty-state" hidden>لم تُولَّد أي أكواد بعد.</p>
+    </div>
+
+    <!-- لوحة الإعدادات -->
+    <div id="panel-settings" class="panel">
+      <h2>تغيير كلمة السر</h2>
+      <form id="form-change-password" class="stack">
+        <label for="input-current-password" class="field-label">كلمة السر الحالية</label>
+        <input id="input-current-password" class="input" type="password" required autocomplete="current-password" />
+        <label for="input-new-password" class="field-label">كلمة السر الجديدة (6 أحرف على الأقل)</label>
+        <input id="input-new-password" class="input" type="password" required minlength="6" autocomplete="new-password" />
+        <button type="submit" class="btn btn-primary btn-block">حفظ كلمة السر الجديدة</button>
+        <p id="password-change-msg" class="field-hint" role="status" hidden></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ======================= المعلم: داخل صف (الوحدات) ======================= -->
+  <section id="screen-teacher-class" class="screen">
+    <button class="btn-back" data-back-to="screen-teacher-dashboard" type="button" aria-label="رجوع">‹ رجوع</button>
+    <header class="topbar">
+      <h1 id="teacher-class-title">الصف</h1>
+      <button id="btn-delete-class" class="btn btn-danger-ghost btn-sm" type="button">حذف الصف</button>
+    </header>
+    <div class="panel-toolbar">
+      <h2>الوحدات</h2>
+      <button id="btn-add-unit" class="btn btn-primary btn-sm" type="button">+ إضافة وحدة</button>
+    </div>
+    <ul id="list-units" class="specimen-list"></ul>
+    <p id="empty-units" class="empty-state" hidden>لا توجد وحدات بعد.</p>
+  </section>
+
+  <!-- ======================= المعلم: داخل وحدة (الدروس) ======================= -->
+  <section id="screen-teacher-unit" class="screen">
+    <button class="btn-back" data-back-to="screen-teacher-class" type="button" aria-label="رجوع">‹ رجوع</button>
+    <header class="topbar">
+      <h1 id="teacher-unit-title">الوحدة</h1>
+      <button id="btn-delete-unit" class="btn btn-danger-ghost btn-sm" type="button">حذف الوحدة</button>
+    </header>
+    <div class="panel-toolbar">
+      <h2>الدروس</h2>
+      <button id="btn-add-lesson" class="btn btn-primary btn-sm" type="button">+ إضافة درس</button>
+    </div>
+    <ul id="list-lessons" class="specimen-list"></ul>
+    <p id="empty-lessons" class="empty-state" hidden>لا توجد دروس بعد.</p>
+  </section>
+
+  <!-- ======================= المعلم: محرر الدرس (رفع صورة + تغبيش) ======================= -->
+  <section id="screen-teacher-lesson-editor" class="screen">
+    <button class="btn-back" data-back-to="screen-teacher-unit" type="button" aria-label="رجوع">‹ رجوع</button>
+    <header class="topbar">
+      <h1 id="lesson-editor-title">تعديل الدرس</h1>
+      <button id="btn-delete-lesson" class="btn btn-danger-ghost btn-sm" type="button">حذف الدرس</button>
+    </header>
+
+    <label for="input-lesson-name" class="field-label">اسم الدرس</label>
+    <input id="input-lesson-name" class="input" type="text" placeholder="مثال: جهاز الدوران" />
+
+    <div class="editor-toolbar">
+      <label class="btn btn-outline btn-sm file-btn">
+        رفع صورة الرسمة
+        <input id="input-lesson-image" type="file" accept="image/*" hidden />
+      </label>
+      <button id="btn-clear-boxes" class="btn btn-ghost btn-sm" type="button">مسح كل المربعات</button>
+      <button id="btn-undo-box" class="btn btn-ghost btn-sm" type="button">تراجع عن آخر مربع</button>
+    </div>
+    <p class="field-hint">ارسم مربعاً أسود فوق كل مسمّى تريد إخفاءه بالسحب على الصورة. اكتب النص المخفي داخل كل مربع (اختياري، للمرجع فقط).</p>
+
+    <div id="lesson-image-wrap" class="lesson-image-wrap hidden">
+      <img id="lesson-image-preview" alt="رسمة الدرس" />
+      <div id="lesson-boxes-layer" class="boxes-layer"></div>
+    </div>
+    <p id="lesson-no-image-msg" class="empty-state">لم تُرفع صورة بعد.</p>
+
+    <button id="btn-save-lesson" class="btn btn-primary btn-block" type="button">حفظ الدرس</button>
+    <p id="lesson-save-msg" class="field-hint" role="status" hidden></p>
+  </section>
+
+  <!-- ======================= الطالب: الصفوف ======================= -->
+  <section id="screen-student-classes" class="screen">
+    <header class="topbar">
+      <h1>اختر الصف</h1>
+      <button id="btn-student-logout" class="btn btn-ghost btn-sm" type="button">خروج</button>
+    </header>
+    <ul id="list-student-classes" class="specimen-list"></ul>
+    <p id="empty-student-classes" class="empty-state" hidden>لا توجد صفوف متاحة حالياً.</p>
+  </section>
+
+  <!-- ======================= الطالب: الوحدات ======================= -->
+  <section id="screen-student-units" class="screen">
+    <button class="btn-back" data-back-to="screen-student-classes" type="button" aria-label="رجوع">‹ رجوع</button>
+    <h1 id="student-class-title">الوحدات</h1>
+    <ul id="list-student-units" class="specimen-list"></ul>
+    <p id="empty-student-units" class="empty-state" hidden>لا توجد وحدات متاحة حالياً.</p>
+  </section>
+
+  <!-- ======================= الطالب: الدروس ======================= -->
+  <section id="screen-student-lessons" class="screen">
+    <button class="btn-back" data-back-to="screen-student-units" type="button" aria-label="رجوع">‹ رجوع</button>
+    <h1 id="student-unit-title">الدروس</h1>
+    <ul id="list-student-lessons" class="specimen-list"></ul>
+    <p id="empty-student-lessons" class="empty-state" hidden>لا توجد دروس متاحة حالياً.</p>
+  </section>
+
+  <!-- ======================= الطالب: عارض الرسمة ======================= -->
+  <section id="screen-student-viewer" class="screen">
+    <button class="btn-back" data-back-to="screen-student-lessons" type="button" aria-label="رجوع">‹ رجوع</button>
+    <h1 id="student-lesson-title">الدرس</h1>
+    <p class="field-hint">انقر على أي مربع أسود لإظهار المسمّى المخفي تحته.</p>
+    <button id="btn-reset-viewer" class="btn btn-outline btn-sm" type="button">إعادة إخفاء الكل</button>
+    <div id="viewer-image-wrap" class="lesson-image-wrap">
+      <img id="viewer-image" alt="رسمة الدرس" />
+      <div id="viewer-boxes-layer" class="boxes-layer viewer-mode"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ======================= نافذة منبثقة عامة (تأكيد / إدخال اسم) ======================= -->
+<div id="modal-backdrop" class="modal-backdrop hidden">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3 id="modal-title"></h3>
+    <p id="modal-message" class="modal-message"></p>
+    <input id="modal-input" class="input" type="text" hidden />
+    <div class="modal-actions">
+      <button id="modal-cancel" class="btn btn-ghost" type="button">إلغاء</button>
+      <button id="modal-confirm" class="btn btn-primary" type="button">تأكيد</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/cloudinary-config.js"></script>
+<script src="js/cloudinary.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/router.js"></script>
+<script src="js/db.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/teacher.js"></script>
+<script src="js/student.js"></script>
+<script src="js/app.js"></script>
+</body>
+      </html>
