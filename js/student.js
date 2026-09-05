@@ -118,3 +118,42 @@ li.innerHTML = `<div class="specimen-item-title">${Utils.escapeHtml(u.name)}</di
   function openViewer(lesson) {
     state.lessonId = lesson.id;
     document.getElementById("student-lesson-title").textContent = lesson.name;
+const img = document.getElementById("viewer-image");
+    img.src = lesson.imageURL;
+    renderViewerBoxes(lesson.labels || []);
+    Router.show("screen-student-viewer");
+  }
+
+  function renderViewerBoxes(labels) {
+    const layer = document.getElementById("viewer-boxes-layer");
+    layer.innerHTML = "";
+    labels.forEach((label) => {
+      const el = document.createElement("div");
+      el.className = "label-box";
+      el.style.left = label.xPct + "%";
+      el.style.top = label.yPct + "%";
+      el.style.width = label.wPct + "%";
+      el.style.height = label.hPct + "%";
+      el.setAttribute("role", "button");
+      el.setAttribute("aria-label", "انقر لإظهار المسمّى");
+      el.addEventListener("click", () => el.classList.toggle("revealed"));
+      layer.appendChild(el);
+    });
+  }
+
+  function initResetViewer() {
+    document.getElementById("btn-reset-viewer").addEventListener("click", () => {
+      document.querySelectorAll("#viewer-boxes-layer .label-box").forEach((el) =>
+        el.classList.remove("revealed")
+      );
+    });
+  }
+
+  function init() {
+    initLoginForm();
+    initTeacherLoginLink();
+    initResetViewer();
+  }
+
+  return { init, enterClasses };
+})();
