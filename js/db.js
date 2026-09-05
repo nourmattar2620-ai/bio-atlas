@@ -72,3 +72,40 @@ const units = await getUnits(classId);
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   }
   async function getLesson(classId, unitId, lessonId) {
+const doc = await lessonsCol(classId, unitId).doc(lessonId).get();
+    return doc.exists ? { id: doc.id, ...doc.data() } : null;
+  }
+  async function addLesson(classId, unitId, name) {
+    const count = (await lessonsCol(classId, unitId).get()).size;
+    const ref = await lessonsCol(classId, unitId).add({
+      name,
+      imageURL: null,
+      imageCloudinaryId: null,
+      labels: [],
+      order: count,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    return ref.id;
+  }
+  async function updateLesson(classId, unitId, lessonId, data) {
+    await lessonsCol(classId, unitId).doc(lessonId).update(data);
+  }
+  async function deleteLesson(classId, unitId, lessonId) {
+    const lesson = await getLesson(classId, unitId, lessonId);
+    if (lesson && lesson.imageCloudinaryId) {
+      await deleteImage(lesson.imageCloudinaryId).catch(() => {});
+    }
+    await lessonsCol(classId, unitId).doc(lessonId).delete();
+  }
+
+  // ---------- الصور (عبر Cloudinary) ----------
+  async function uploadLessonImage(file) {
+    const { url, publicId } = await Cloudinary.uploadImage(file);
+    return { url, path: publicId };
+  }
+  async function deleteImage(_path) {
+    return Promise.resolve();
+  }
+
+  // ---------- أكواد الطلاب ----------
+  async function getCodes() {
