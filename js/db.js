@@ -104,7 +104,44 @@ const doc = await lessonsCol(classId, unitId).doc(lessonId).get();
     return { url, path: publicId };
   }
   async function deleteImage(_path) {
-    return Promise.resolve();
+    return Promise.resolve();const snap = await codesCol().orderBy("createdAt", "desc").get();
+    return snap.docs.map((d) => ({ code: d.id, ...d.data() }));
+  }
+  async function generateCode(note = "") {
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const code = Utils.generateStudentCode();
+      const ref = codesCol().doc(code);
+      const existing = await ref.get();
+      if (!existing.exists) {
+        await ref.set({
+          active: true,
+          note,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        return code;
+      }
+    }
+    throw new Error("تعذر توليد كود فريد، حاول مرة أخرى");
+  }
+  async function deleteCode(code) {
+    await codesCol().doc(code).delete();
+  }
+  async function toggleCode(code, active) {
+    await codesCol().doc(code).update({ active });
+  }
+  async function validateCode(code) {
+    const doc = await codesCol().doc(code).get();
+    return doc.exists && doc.data().active !== false;
+  }
+
+  return {
+    getClasses, getClass, addClass, deleteClass,
+    getUnits, getUnit, addUnit, deleteUnit,
+    getLessons, getLesson, addLesson, updateLesson, deleteLesson,
+    uploadLessonImage, deleteImage,
+    getCodes, generateCode, deleteCode, toggleCode, validateCode,
+  };
+})();
   }
 
   // ---------- أكواد الطلاب ----------
