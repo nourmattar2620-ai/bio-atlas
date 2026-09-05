@@ -541,4 +541,55 @@ const Teacher = (() => {
       const note = await UI.promptDialog("توليد كود جديد", "اسم الطالب (اختياري)", "مثال: أحمد");
       UI.showLoading("جارٍ التوليد…");
       try {
-        const code = await DB.genera
+        const code = await DB.generateCode(note || "");
+        UI.toast("تم توليد الكود: " + code);
+        loadCodes();
+      } catch (err) {
+        UI.toast("تعذر التوليد: " + err.message, "error");
+      } finally {
+        UI.hideLoading();
+      }
+    });
+  }
+
+  // ===================== الإعدادات: تغيير كلمة السر =====================
+  function initChangePassword() {
+    document.getElementById("form-change-password").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const current = document.getElementById("input-current-password").value;
+      const next = document.getElementById("input-new-password").value;
+      const msg = document.getElementById("password-change-msg");
+      UI.showLoading("جارٍ التحديث…");
+      try {
+        await Auth.changeTeacherPassword(current, next);
+        msg.textContent = "تم تغيير كلمة السر بنجاح";
+        msg.hidden = false;
+        e.target.reset();
+      } catch (err) {
+        msg.textContent = "تعذر التغيير: تأكد من كلمة السر الحالية";
+        msg.hidden = false;
+      } finally {
+        UI.hideLoading();
+      }
+    });
+  }
+
+  function init() {
+    initLoginForm();
+    initTabs();
+    initAddClass();
+    initDeleteClass();
+    initAddUnit();
+    initDeleteUnit();
+    initAddLesson();
+    initDeleteLesson();
+    initImageUpload();
+    initBoxDrawing();
+    initBoxControls();
+    initSaveLesson();
+    initGenerateCode();
+    initChangePassword();
+  }
+
+  return { init, enterDashboard };
+})();
