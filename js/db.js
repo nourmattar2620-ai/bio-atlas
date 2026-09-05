@@ -33,3 +33,42 @@ const DB = (() => {
     }
     await classesCol().doc(classId).delete();
   }
+const units = await getUnits(classId);
+    for (const unit of units) {
+      await deleteUnit(classId, unit.id);
+    }
+    await classesCol().doc(classId).delete();
+  }
+
+  // ---------- الوحدات ----------
+  async function getUnits(classId) {
+    const snap = await unitsCol(classId).orderBy("order", "asc").get();
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  }
+  async function getUnit(classId, unitId) {
+    const doc = await unitsCol(classId).doc(unitId).get();
+    return doc.exists ? { id: doc.id, ...doc.data() } : null;
+  }
+  async function addUnit(classId, name) {
+    const count = (await unitsCol(classId).get()).size;
+    const ref = await unitsCol(classId).add({
+      name,
+      order: count,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    return ref.id;
+  }
+  async function deleteUnit(classId, unitId) {
+    const lessons = await getLessons(classId, unitId);
+    for (const lesson of lessons) {
+      await deleteLesson(classId, unitId, lesson.id);
+    }
+    await unitsCol(classId).doc(unitId).delete();
+  }
+
+  // ---------- الدروس ----------
+  async function getLessons(classId, unitId) {
+    const snap = await lessonsCol(classId, unitId).orderBy("order", "asc").get();
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  }
+  async function getLesson(classId, unitId, lessonId) {
