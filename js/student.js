@@ -78,3 +78,43 @@ const Student = (() => {
         const li = document.createElement("li");
         li.className = "specimen-item";
         li.tabIndex = 0;
+li.innerHTML = `<div class="specimen-item-title">${Utils.escapeHtml(u.name)}</div><span class="specimen-item-arrow">‹</span>`;
+        li.addEventListener("click", () => openUnit(u.id, u.name));
+        list.appendChild(li);
+      });
+    } catch (err) {
+      UI.toast("تعذر تحميل الوحدات: " + err.message, "error");
+    } finally {
+      UI.hideLoading();
+    }
+  }
+
+  async function openUnit(unitId, unitName) {
+    state.unitId = unitId;
+    document.getElementById("student-unit-title").textContent = unitName;
+    Router.show("screen-student-lessons");
+    UI.showLoading("جارٍ تحميل الدروس…");
+    try {
+      const lessons = await DB.getLessons(state.classId, unitId);
+      const list = document.getElementById("list-student-lessons");
+      list.innerHTML = "";
+      const withImages = lessons.filter((l) => l.imageURL);
+      document.getElementById("empty-student-lessons").hidden = withImages.length > 0;
+      withImages.forEach((l) => {
+        const li = document.createElement("li");
+        li.className = "specimen-item";
+        li.tabIndex = 0;
+        li.innerHTML = `<div class="specimen-item-title">${Utils.escapeHtml(l.name)}</div><span class="specimen-item-arrow">‹</span>`;
+        li.addEventListener("click", () => openViewer(l));
+        list.appendChild(li);
+      });
+    } catch (err) {
+      UI.toast("تعذر تحميل الدروس: " + err.message, "error");
+    } finally {
+      UI.hideLoading();
+    }
+  }
+
+  function openViewer(lesson) {
+    state.lessonId = lesson.id;
+    document.getElementById("student-lesson-title").textContent = lesson.name;
