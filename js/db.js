@@ -33,12 +33,7 @@ const DB = (() => {
     }
     await classesCol().doc(classId).delete();
   }
-const units = await getUnits(classId);
-    for (const unit of units) {
-      await deleteUnit(classId, unit.id);
-    }
-    await classesCol().doc(classId).delete();
-  }
+  
 
   // ---------- الوحدات ----------
   async function getUnits(classId) {
