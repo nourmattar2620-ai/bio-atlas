@@ -394,3 +394,201 @@ const Teacher = (() => {
       layer.appendChild(draftEl);
       layer.setPointerCapture(e.pointerId);
     });
+layer.addEventListener("pointermove", (e) => {
+      if (!dragging || !draftEl) return;
+      const { x, y } = pointFromEvent(e);
+      const left = Math.min(x, startX);
+      const top = Math.min(y, startY);
+      const w = Math.abs(x - startX);
+      const h = Math.abs(y - startY);
+      draftEl.style.left = left + "px";
+      draftEl.style.top = top + "px";
+      draftEl.style.width = w + "px";
+      draftEl.style.height = h + "px";
+    });
+
+    async function endDrag(e) {
+      if (!dragging) return;
+      dragging = false;
+      const rect = layer.getBoundingClientRect();
+      const boxRect = draftEl.getBoundingClientRect();
+      const wPx = boxRect.width, hPx = boxRect.height;
+      draftEl.remove();
+      draftEl = null;
+
+      if (wPx < 12 || hPx < 12) return;
+
+      const leftPx = boxRect.left - rect.left;
+      const topPx = boxRect.top - rect.top;
+
+      const label = {
+        id: Utils.generateId(),
+        xPct: +((leftPx / rect.width) * 100).toFixed(2),
+        yPct: +((topPx / rect.height) * 100).toFixed(2),
+        wPct: +((wPx / rect.width) * 100).toFixed(2),
+        hPct: +((hPx / rect.height) * 100).toFixed(2),
+        text: "",
+      };
+      state.labels.push(label);
+      renderBoxes();
+
+      const text = await UI.promptDialog(
+        "نص المسمّى (اختياري، للمرجع فقط)",
+        "اترك الحقل فارغاً وتجاهل إن لم ترغب بتسجيل النص",
+        "مثال: الأذين الأيمن"
+      );
+      if (text) {
+        label.text = text;
+        renderBoxes();
+      }
+    }
+
+    layer.addEventListener("pointerup", endDrag);
+    layer.addEventListener("pointercancel", endDrag);
+  }
+
+  function initBoxControls() {
+    document.getElementById("btn-clear-boxes").addEventListener("click", async () => {
+      if (state.labels.length === 0) return;
+      const ok = await UI.confirmDialog("مسح كل المربعات", "سيتم حذف كل مربعات التغبيش في هذا الدرس. متابعة؟");
+      if (!ok) return;
+      state.labels = [];
+      renderBoxes();
+    });
+    document.getElementById("btn-undo-box").addEventListener("click", () => {
+      state.labels.pop();
+      renderBoxes();
+    });
+  }
+
+  function initSaveLesson() {
+    document.getElementById("btn-save-lesson").addEventListener("click", async () => {
+      const name = document.getElementById("input-lesson-name").value.trim();
+      if (!name) {
+        UI.toast("اكتب اسم الدرس أولاً", "error");
+        return;
+      }
+      UI.showLoading("جارٍ الحفظ…");
+      try {
+        const updates = { name, labels: state.labels };
+
+        if (state.imageFile) {
+          const lesson = await DB.getLesson(state.classId, state.unitId, state.lessonId);
+          if (lesson.imageCloudinaryId) {
+            await DB.deleteImage(lesson.imageCloudinaryId).catch(() => {});
+          }
+          const { url, path } = await DB.uploadLessonImage(state.imageFile);
+          updates.imageURL = url;
+          updates.imageCloudinaryId = path;
+        }
+
+        await DB.updateLesson(state.classId, state.unitId, state.lessonId, updates);
+        state.imageFile = null;
+        UI.toast("تم حفظ الدرس بنجاح");
+        const msg = document.getElementById("lesson-save-msg");
+        msg.textContent = "آخر حفظ: الآن";
+        msg.hidden = false;
+      } catch (err) {
+        UI.toast("تعذر الحفظ: " + err.message, "error");
+      } finally {
+        UI.hideLoading();
+      }
+    });
+  }
+
+  // ===================== أكواد الطلاب =====================
+  async function loadCodes() {
+    UI.showLoading("جارٍ تحميل الأكواد…");
+    try {
+      const codes = await DB.getCodes();
+      const list = document.getElementById("list-codes");
+      list.innerHTML = "";
+      document.getElementById("empty-codes").hidden = codes.length > 0;
+      codes.forEach((c) => {
+        const li = document.createElement("li");
+        li.className = "specimen-item code-item";
+        li.innerHTML = `
+          <div>
+            <div class="code-value">${c.code}</div>
+            <div class="specimen-item-sub">${c.active === false ? "معطّل" : "فعّال"}${c.note ? " · " + Utils.escapeHtml(c.note) : ""}</div>
+          </div>
+          <div class="code-actions">
+            <button class="btn btn-ghost btn-sm" data-action="toggle">${c.active === false ? "تفعيل" : "تعطيل"}</button>
+            <button class="btn btn-danger-ghost btn-sm" data-action="delete">حذف</button>
+          </div>`;
+        li.querySelector('[data-action="toggle"]').addEventListener("click", async () => {
+          await DB.toggleCode(c.code, c.active === false);
+          loadCodes();
+        });
+        li.querySelector('[data-action="delete"]').addEventListener("click", async () => {
+          const ok = await UI.confirmDialog("حذف الكود", `سيتم حذف الكود ${c.code} نهائياً.`, "حذف");
+          if (!ok) return;
+          await DB.deleteCode(c.code);
+          loadCodes();
+        });
+        list.appendChild(li);
+      });
+    } catch (err) {
+      UI.toast("تعذر تحميل الأكواد: " + err.message, "error");
+    } finally {
+      UI.hideLoading();
+    }
+  }
+
+  function initGenerateCode() {
+    document.getElementById("btn-generate-code").addEventListener("click", async () => {
+      const note = await UI.promptDialog("توليد كود جديد", "اسم الطالب (اختياري)", "مثال: أحمد");
+      UI.showLoading("جارٍ التوليد…");
+      try {
+        const code = await DB.generateCode(note || "");
+        UI.toast("تم توليد الكود: " + code);
+        loadCodes();
+      } catch (err) {
+        UI.toast("تعذر التوليد: " + err.message, "error");
+      } finally {
+        UI.hideLoading();
+      }
+    });
+  }
+
+  // ===================== الإعدادات: تغيير كلمة السر =====================
+  function initChangePassword() {
+    document.getElementById("form-change-password").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const current = document.getElementById("input-current-password").value;
+      const next = document.getElementById("input-new-password").value;
+      const msg = document.getElementById("password-change-msg");
+      UI.showLoading("جارٍ التحديث…");
+      try {
+        await Auth.changeTeacherPassword(current, next);
+        msg.textContent = "تم تغيير كلمة السر بنجاح";
+        msg.hidden = false;
+        e.target.reset();
+      } catch (err) {
+        msg.textContent = "تعذر التغيير: تأكد من كلمة السر الحالية";
+        msg.hidden = false;
+      } finally {
+        UI.hideLoading();
+      }
+    });
+  }
+
+  function init() {
+    initLoginForm();
+    initTabs();
+    initAddClass();
+    initDeleteClass();
+    initAddUnit();
+    initDeleteUnit();
+    initAddLesson();
+    initDeleteLesson();
+    initImageUpload();
+    initBoxDrawing();
+    initBoxControls();
+    initSaveLesson();
+    initGenerateCode();
+    initChangePassword();
+  }
+
+  return { init, enterDashboard };
+})();
