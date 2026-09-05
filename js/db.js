@@ -66,3 +66,78 @@ const DB = (() => {
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   }
   async function getLesson(classId, unitId, lessonId) {
+const doc = await lessonsCol(classId, unitId).doc(lessonId).get();
+    return doc.exists ? { id: doc.id, ...doc.data() } : null;
+  }
+  async function addLesson(classId, unitId, name) {
+    const count = (await lessonsCol(classId, unitId).get()).size;
+    const ref = await lessonsCol(classId, unitId).add({
+      name,
+      imageURL: null,
+      imageCloudinaryId: null,
+      labels: [],
+      order: count,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    return ref.id;
+  }
+  async function updateLesson(classId, unitId, lessonId, data) {
+    await lessonsCol(classId, unitId).doc(lessonId).update(data);
+  }
+  async function deleteLesson(classId, unitId, lessonId) {
+    const lesson = await getLesson(classId, unitId, lessonId);
+    if (lesson && lesson.imageCloudinaryId) {
+      await deleteImage(lesson.imageCloudinaryId).catch(() => {});
+    }
+    await lessonsCol(classId, unitId).doc(lessonId).delete();
+  }
+
+  // ---------- الصور (عبر Cloudinary) ----------
+  async function uploadLessonImage(file) {
+    const { url, publicId } = await Cloudinary.uploadImage(file);
+    return { url, path: publicId };
+  }
+  async function deleteImage(_path) {
+    return Promise.resolve();
+  }
+
+  // ---------- أكواد الطلاب ----------
+  async function getCodes() {
+    const snap = await codesCol().orderBy("createdAt", "desc").get();
+    return snap.docs.map((d) => ({ code: d.id, ...d.data() }));
+  }
+  async function generateCode(note = "") {
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const code = Utils.generateStudentCode();
+      const ref = codesCol().doc(code);
+      const existing = await ref.get();
+      if (!existing.exists) {
+        await ref.set({
+          active: true,
+          note,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        return code;
+      }
+    }
+    throw new Error("تعذر توليد كود فريد، حاول مرة أخرى");
+  }
+  async function deleteCode(code) {
+    await codesCol().doc(code).delete();
+  }
+  async function toggleCode(code, active) {
+    await codesCol().doc(code).update({ active });
+  }
+  async function validateCode(code) {
+    const doc = await codesCol().doc(code).get();
+    return doc.exists && doc.data().active !== false;
+  }
+
+  return {
+    getClasses, getClass, addClass, deleteClass,
+    getUnits, getUnit, addUnit, deleteUnit,
+    getLessons, getLesson, addLesson, updateLesson, deleteLesson,
+    uploadLessonImage, deleteImage,
+    getCodes, generateCode, deleteCode, toggleCode, validateCode,
+  };
+})();
