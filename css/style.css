@@ -329,6 +329,65 @@ button, input {
   font-weight: 700;
 }
 .code-actions { display: flex; gap: var(--space-1); }
+/* قائمة مصغّرات الرسومات */
+.thumb-list .specimen-item {
+  align-items: center;
+}
+.thumb-item-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: #eee;
+  flex-shrink: 0;
+}
+.thumb-item-placeholder {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--line);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  background: var(--paper);
+}
+.thumb-item-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.thumb-item-delete {
+  background: transparent;
+  border: none;
+  color: var(--danger);
+  font-size: 1.1rem;
+  padding: var(--space-1);
+  cursor: pointer;
+}
+
+/* حقل اختيار اللون */
+.color-field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.color-field input[type="color"] {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+}
 
 .empty-state {
   color: var(--ink-soft);
