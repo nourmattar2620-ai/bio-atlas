@@ -197,3 +197,200 @@ const Teacher = (() => {
         UI.toast("تعذر الحذف: " + err.message, "error");
       } finally {
         UI.hideLoading();
+}
+    });
+  }
+
+  // ===================== الدروس =====================
+  async function loadLessons() {
+    UI.showLoading("جارٍ تحميل الدروس…");
+    try {
+      const lessons = await DB.getLessons(state.classId, state.unitId);
+      const list = document.getElementById("list-lessons");
+      list.innerHTML = "";
+      document.getElementById("empty-lessons").hidden = lessons.length > 0;
+      lessons.forEach((l) => {
+        const li = document.createElement("li");
+        li.className = "specimen-item";
+        li.tabIndex = 0;
+        const sub = l.imageURL ? `${(l.labels || []).length} مسمّى مخفي` : "بدون صورة بعد";
+        li.innerHTML = `
+          <div>
+            <div class="specimen-item-title">${Utils.escapeHtml(l.name)}</div>
+            <div class="specimen-item-sub">${sub}</div>
+          </div>
+          <span class="specimen-item-arrow">‹</span>`;
+        li.addEventListener("click", () => openLessonEditor(l.id));
+        list.appendChild(li);
+      });
+    } catch (err) {
+      UI.toast("تعذر تحميل الدروس: " + err.message, "error");
+    } finally {
+      UI.hideLoading();
+    }
+  }
+
+  function initAddLesson() {
+    document.getElementById("btn-add-lesson").addEventListener("click", async () => {
+      const name = await UI.promptDialog("إضافة درس جديد", "", "مثال: جهاز الدوران");
+      if (!name) return;
+      UI.showLoading("جارٍ الإضافة…");
+      try {
+        const lessonId = await DB.addLesson(state.classId, state.unitId, name);
+        await loadLessons();
+        UI.toast("تمت إضافة الدرس، أضف الصورة الآن");
+        openLessonEditor(lessonId);
+      } catch (err) {
+        UI.toast("تعذرت الإضافة: " + err.message, "error");
+      } finally {
+        UI.hideLoading();
+      }
+    });
+  }
+
+  // ===================== محرر الدرس (رفع صورة + تغبيش) =====================
+  async function openLessonEditor(lessonId) {
+    state.lessonId = lessonId;
+    state.imageFile = null;
+    UI.showLoading("جارٍ تحميل الدرس…");
+    try {
+      const lesson = await DB.getLesson(state.classId, state.unitId, lessonId);
+      state.labels = (lesson.labels || []).map((l) => ({ ...l }));
+      document.getElementById("lesson-editor-title").textContent = lesson.name;
+      document.getElementById("input-lesson-name").value = lesson.name;
+
+      const wrap = document.getElementById("lesson-image-wrap");
+      const img = document.getElementById("lesson-image-preview");
+      const noImgMsg = document.getElementById("lesson-no-image-msg");
+      if (lesson.imageURL) {
+        img.src = lesson.imageURL;
+        wrap.classList.remove("hidden");
+        noImgMsg.hidden = true;
+      } else {
+        img.removeAttribute("src");
+        wrap.classList.add("hidden");
+        noImgMsg.hidden = false;
+      }
+      document.getElementById("lesson-save-msg").hidden = true;
+      renderBoxes();
+      Router.show("screen-teacher-lesson-editor");
+    } catch (err) {
+      UI.toast("تعذر تحميل الدرس: " + err.message, "error");
+    } finally {
+      UI.hideLoading();
+    }
+  }
+
+  function initDeleteLesson() {
+    document.getElementById("btn-delete-lesson").addEventListener("click", async () => {
+      const ok = await UI.confirmDialog("حذف الدرس", "سيتم حذف الدرس وصورته نهائياً. متابعة؟", "حذف نهائي");
+      if (!ok) return;
+      UI.showLoading("جارٍ الحذف…");
+      try {
+        await DB.deleteLesson(state.classId, state.unitId, state.lessonId);
+        UI.toast("تم حذف الدرس");
+        Router.show("screen-teacher-unit");
+        await loadLessons();
+      } catch (err) {
+        UI.toast("تعذر الحذف: " + err.message, "error");
+      } finally {
+        UI.hideLoading();
+      }
+    });
+  }
+
+  function initImageUpload() {
+    document.getElementById("input-lesson-image").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      state.imageFile = file;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = document.getElementById("lesson-image-preview");
+        img.src = reader.result;
+        document.getElementById("lesson-image-wrap").classList.remove("hidden");
+        document.getElementById("lesson-no-image-msg").hidden = true;
+        state.labels = [];
+        renderBoxes();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderBoxes() {
+    const layer = document.getElementById("lesson-boxes-layer");
+    layer.innerHTML = "";
+    state.labels.forEach((label) => layer.appendChild(buildBoxEl(label)));
+  }
+
+  function buildBoxEl(label) {
+    const el = document.createElement("div");
+    el.className = "label-box editing";
+    el.style.left = label.xPct + "%";
+    el.style.top = label.yPct + "%";
+    el.style.width = label.wPct + "%";
+    el.style.height = label.hPct + "%";
+    el.dataset.id = label.id;
+
+    const textEl = document.createElement("span");
+    textEl.className = "box-text";
+    textEl.textContent = label.text || "بدون نص";
+    el.appendChild(textEl);
+
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "box-delete";
+    delBtn.textContent = "×";
+    delBtn.setAttribute("aria-label", "حذف المربع");
+    delBtn.addEventListener("pointerdown", (e) => e.stopPropagation());
+    delBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      state.labels = state.labels.filter((l) => l.id !== label.id);
+      renderBoxes();
+    });
+    el.appendChild(delBtn);
+
+    el.addEventListener("click", async (e) => {
+      if (e.target === delBtn) return;
+      const text = await UI.promptDialog(
+        "نص المسمّى (اختياري، للمرجع فقط)",
+        "",
+        "مثال: الأذين الأيمن",
+        label.text || ""
+      );
+      if (text !== null) {
+        label.text = text;
+        renderBoxes();
+      }
+    });
+
+    return el;
+  }
+
+  function initBoxDrawing() {
+    const wrap = document.getElementById("lesson-image-wrap");
+    const layer = document.getElementById("lesson-boxes-layer");
+    let startX = 0, startY = 0, dragging = false, draftEl = null;
+
+    function pointFromEvent(e) {
+      const rect = layer.getBoundingClientRect();
+      const x = Math.min(Math.max(e.clientX - rect.left, 0), rect.width);
+      const y = Math.min(Math.max(e.clientY - rect.top, 0), rect.height);
+      return { x, y, rect };
+    }
+
+    layer.addEventListener("pointerdown", (e) => {
+      if (e.target !== layer) return;
+      const { x, y } = pointFromEvent(e);
+      startX = x;
+      startY = y;
+      dragging = true;
+      draftEl = document.createElement("div");
+      draftEl.className = "label-box";
+      draftEl.style.left = x + "px";
+      draftEl.style.top = y + "px";
+      draftEl.style.width = "0px";
+      draftEl.style.height = "0px";
+      layer.appendChild(draftEl);
+      layer.setPointerCapture(e.pointerId);
+    });
