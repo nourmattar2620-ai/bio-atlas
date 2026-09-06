@@ -130,8 +130,7 @@
     <ul id="list-units" class="specimen-list"></ul>
     <p id="empty-units" class="empty-state" hidden>لا توجد وحدات بعد.</p>
   </section>
-
-  <!-- ======================= المعلم: داخل وحدة (الدروس) ======================= -->
+<!-- ======================= المعلم: داخل وحدة (الدروس) ======================= -->
   <section id="screen-teacher-unit" class="screen">
     <button class="btn-back" data-back-to="screen-teacher-class" type="button" aria-label="رجوع">‹ رجوع</button>
     <header class="topbar">
@@ -146,26 +145,44 @@
     <p id="empty-lessons" class="empty-state" hidden>لا توجد دروس بعد.</p>
   </section>
 
-  <!-- ======================= المعلم: محرر الدرس (رفع صورة + تغبيش) ======================= -->
-  <section id="screen-teacher-lesson-editor" class="screen">
+  <!-- ======================= المعلم: رسومات الدرس (قائمة مصغّرات) ======================= -->
+  <section id="screen-teacher-lesson-images" class="screen">
     <button class="btn-back" data-back-to="screen-teacher-unit" type="button" aria-label="رجوع">‹ رجوع</button>
     <header class="topbar">
-      <h1 id="lesson-editor-title">تعديل الدرس</h1>
+      <h1 id="teacher-lesson-images-title">الدرس</h1>
       <button id="btn-delete-lesson" class="btn btn-danger-ghost btn-sm" type="button">حذف الدرس</button>
     </header>
+    <div class="panel-toolbar">
+      <h2>الرسومات</h2>
+      <button id="btn-add-image" class="btn btn-primary btn-sm" type="button">+ إضافة رسمة</button>
+    </div>
+    <ul id="list-lesson-images" class="specimen-list thumb-list"></ul>
+    <p id="empty-lesson-images" class="empty-state" hidden>لا توجد رسومات بعد.</p>
+  </section>
 
-    <label for="input-lesson-name" class="field-label">اسم الدرس</label>
+  <!-- ======================= المعلم: محرر رسمة (رفع صورة + تغبيش) ======================= -->
+  <section id="screen-teacher-lesson-editor" class="screen">
+    <button class="btn-back" data-back-to="screen-teacher-lesson-images" type="button" aria-label="رجوع">‹ رجوع</button>
+    <header class="topbar">
+      <h1 id="lesson-editor-title">تعديل الرسمة</h1>
+      <button id="btn-delete-image" class="btn btn-danger-ghost btn-sm" type="button">حذف الرسمة</button>
+    </header>
+
+    <label for="input-lesson-name" class="field-label">اسم الرسمة</label>
     <input id="input-lesson-name" class="input" type="text" placeholder="مثال: جهاز الدوران" />
-
-    <div class="editor-toolbar">
+  <div class="editor-toolbar">
       <label class="btn btn-outline btn-sm file-btn">
         رفع صورة الرسمة
         <input id="input-lesson-image" type="file" accept="image/*" hidden />
       </label>
       <button id="btn-clear-boxes" class="btn btn-ghost btn-sm" type="button">مسح كل المربعات</button>
       <button id="btn-undo-box" class="btn btn-ghost btn-sm" type="button">تراجع عن آخر مربع</button>
+      <label class="color-field">
+        لون المربعات الجديدة
+        <input id="input-box-color" type="color" value="#0A0A0A" />
+      </label>
     </div>
-    <p class="field-hint">ارسم مربعاً أسود فوق كل مسمّى تريد إخفاءه بالسحب على الصورة. اكتب النص المخفي داخل كل مربع (اختياري، للمرجع فقط).</p>
+    <p class="field-hint">ارسم مربعاً فوق كل مسمّى تريد إخفاءه بالسحب على الصورة. انقر على أي مربع لتعديل نصه أو حذفه.</p>
 
     <div id="lesson-image-wrap" class="lesson-image-wrap hidden">
       <img id="lesson-image-preview" alt="رسمة الدرس" />
@@ -173,7 +190,7 @@
     </div>
     <p id="lesson-no-image-msg" class="empty-state">لم تُرفع صورة بعد.</p>
 
-    <button id="btn-save-lesson" class="btn btn-primary btn-block" type="button">حفظ الدرس</button>
+    <button id="btn-save-lesson" class="btn btn-primary btn-block" type="button">حفظ الرسمة</button>
     <p id="lesson-save-msg" class="field-hint" role="status" hidden></p>
   </section>
 
@@ -192,7 +209,7 @@
     <button class="btn-back" data-back-to="screen-student-classes" type="button" aria-label="رجوع">‹ رجوع</button>
     <h1 id="student-class-title">الوحدات</h1>
     <ul id="list-student-units" class="specimen-list"></ul>
-    <p id="empty-student-units" class="empty-state" hidden>لا توجد وحدات متاحة حالياً.</p>
+<p id="empty-student-units" class="empty-state" hidden>لا توجد وحدات متاحة حالياً.</p>
   </section>
 
   <!-- ======================= الطالب: الدروس ======================= -->
@@ -203,11 +220,19 @@
     <p id="empty-student-lessons" class="empty-state" hidden>لا توجد دروس متاحة حالياً.</p>
   </section>
 
+  <!-- ======================= الطالب: رسومات الدرس (قائمة مصغّرات) ======================= -->
+  <section id="screen-student-lesson-images" class="screen">
+    <button class="btn-back" data-back-to="screen-student-lessons" type="button" aria-label="رجوع">‹ رجوع</button>
+    <h1 id="student-lesson-images-title">الدرس</h1>
+    <ul id="list-student-lesson-images" class="specimen-list thumb-list"></ul>
+    <p id="empty-student-lesson-images" class="empty-state" hidden>لا توجد رسومات بعد.</p>
+  </section>
+
   <!-- ======================= الطالب: عارض الرسمة ======================= -->
   <section id="screen-student-viewer" class="screen">
-    <button class="btn-back" data-back-to="screen-student-lessons" type="button" aria-label="رجوع">‹ رجوع</button>
+    <button class="btn-back" data-back-to="screen-student-lesson-images" type="button" aria-label="رجوع">‹ رجوع</button>
     <h1 id="student-lesson-title">الدرس</h1>
-    <p class="field-hint">انقر على أي مربع أسود لإظهار المسمّى المخفي تحته.</p>
+    <p class="field-hint">انقر على أي مربع لإظهار المسمّى المخفي تحته.</p>
     <button id="btn-reset-viewer" class="btn btn-outline btn-sm" type="button">إعادة إخفاء الكل</button>
     <div id="viewer-image-wrap" class="lesson-image-wrap">
       <img id="viewer-image" alt="رسمة الدرس" />
@@ -216,7 +241,6 @@
   </section>
 
 </main>
-
 <!-- ======================= نافذة منبثقة عامة (تأكيد / إدخال اسم) ======================= -->
 <div id="modal-backdrop" class="modal-backdrop hidden">
   <div class="modal" role="dialog" aria-modal="true">
