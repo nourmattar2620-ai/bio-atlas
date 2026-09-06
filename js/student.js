@@ -88,3 +88,97 @@ const Student = (() => {
       UI.hideLoading();
     }
   }
+async function openUnit(unitId, unitName) {
+    state.unitId = unitId;
+    document.getElementById("student-unit-title").textContent = unitName;
+    Router.show("screen-student-lessons");
+    UI.showLoading("جارٍ تحميل الدروس…");
+    try {
+      const lessons = await DB.getLessons(state.classId, unitId);
+      const list = document.getElementById("list-student-lessons");
+      list.innerHTML = "";
+      const withImages = lessons.filter((l) => (l.images || []).length > 0);
+      document.getElementById("empty-student-lessons").hidden = withImages.length > 0;
+      withImages.forEach((l) => {
+        const li = document.createElement("li");
+        li.className = "specimen-item";
+        li.tabIndex = 0;
+        li.innerHTML = `<div class="specimen-item-title">${Utils.escapeHtml(l.name)}</div><span class="specimen-item-arrow">‹</span>`;
+        li.addEventListener("click", () => openLessonImages(l));
+        list.appendChild(li);
+      });
+    } catch (err) {
+      UI.toast("تعذر تحميل الدروس: " + err.message, "error");
+    } finally {
+      UI.hideLoading();
+    }
+  }
+
+  function openLessonImages(lesson) {
+    state.lessonId = lesson.id;
+    document.getElementById("student-lesson-images-title").textContent = lesson.name;
+    const list = document.getElementById("list-student-lesson-images");
+    list.innerHTML = "";
+    const images = (lesson.images || []).filter((img) => img.imageURL);
+    document.getElementById("empty-student-lesson-images").hidden = images.length > 0;
+    images.forEach((img) => {
+      const li = document.createElement("li");
+      li.className = "specimen-item";
+      li.tabIndex = 0;
+      li.innerHTML = `
+        <div class="thumb-item-body">
+          <img class="thumb-item-thumb" src="${img.imageURL}" alt="" />
+          <div class="specimen-item-title">${Utils.escapeHtml(img.name || "بدون اسم")}</div>
+        </div>
+        <span class="specimen-item-arrow">‹</span>`;
+      li.addEventListener("click", () => openViewer(img));
+      list.appendChild(li);
+    });
+    Router.show("screen-student-lesson-images");
+  }
+
+  function openViewer(image) {
+    document.getElementById("student-lesson-title").textContent = image.name || "الرسمة";
+    const img = document.getElementById("viewer-image");
+    img.src = image.imageURL;
+    renderViewerBoxes(image.labels || []);
+    Router.show("screen-student-viewer");
+  }
+
+  function renderViewerBoxes(labels) {
+    const layer = document.getElementById("viewer-boxes-layer");
+    layer.innerHTML = "";
+    labels.forEach((label) => {
+      const el = document.createElement("div");
+      el.className = "label-box";
+      el.style.left = label.xPct + "%";
+      el.style.top = label.yPct + "%";
+      el.style.width = label.wPct + "%";
+      el.style.height = label.hPct + "%";
+      el.style.background = label.color || "#0A0A0A";
+      el.setAttribute("role", "button");
+      el.setAttribute("aria-label", "انقر لإظهار المسمّى");
+      el.addEventListener("click", () => {
+        el.classList.toggle("revealed");
+        el.style.background = el.classList.contains("revealed") ? "transparent" : (label.color || "#0A0A0A");
+      });
+      layer.appendChild(el);
+    });
+  }
+
+  function initResetViewer() {
+    document.getElementById("btn-reset-viewer").addEventListener("click", () => {
+      document.querySelectorAll("#viewer-boxes-layer .label-box").forEach((el) =>
+        el.classList.remove("revealed")
+      );
+    });
+  }
+
+  function init() {
+    initLoginForm();
+    initTeacherLoginLink();
+    initResetViewer();
+  }
+
+  return { init, enterClasses };
+})();
