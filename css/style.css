@@ -569,7 +569,64 @@ button, input {
   animation: spin 700ms linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+/* ---------- الفلاش كارد ---------- */
 
+.fc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+}
+.fc-select {
+  width: auto;
+  padding: 8px 10px;
+}
+.fc-content {
+  min-height: 45vh;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: #fff;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  overflow-y: auto;
+  margin-bottom: var(--space-3);
+}
+.fc-content:focus { outline: 2px solid var(--green-mid); }
+.fc-content table, .flashcard table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: var(--space-2) 0;
+}
+.fc-content table td, .fc-content table th,
+.flashcard table td, .flashcard table th {
+  border: 1px solid var(--line);
+  padding: 6px 10px;
+  min-width: 40px;
+}
+
+.fc-viewer-wrap {
+  touch-action: pan-y;
+}
+.flashcard {
+  min-height: 50vh;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  font-size: 1.1rem;
+  line-height: 1.8;
+  overflow-y: auto;
+  box-shadow: 4px 4px 0 rgba(30,42,31,0.08);
+}
+.fc-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.fc-nav.hidden { display: none; }
+.fc-nav .btn { flex: 1; }
 /* ---------- إتاحة الوصول ---------- */
 
 button:focus-visible, input:focus-visible, .specimen-item:focus-visible {
