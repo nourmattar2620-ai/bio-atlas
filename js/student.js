@@ -116,6 +116,7 @@ async function openUnit(unitId, unitName) {
 
   function openLessonImages(lesson) {
     state.lessonId = lesson.id;
+    state.lessonFlashcards = lesson.flashcards || [];
     document.getElementById("student-lesson-images-title").textContent = lesson.name;
     const list = document.getElementById("list-student-lesson-images");
     list.innerHTML = "";
