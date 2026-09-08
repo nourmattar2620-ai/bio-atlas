@@ -179,7 +179,44 @@
       <h1>فلاش كارد</h1>
     </header>
     <div class="panel-toolbar">
+<h2>الكروت</h2>
+      <button id="btn-add-flashcard" class="btn btn-primary btn-sm" type="button">+ إضافة كارد</button>
+    </div>
+    <ul id="list-flashcards" class="specimen-list"></ul>
+    <p id="empty-flashcards" class="empty-state" hidden>لا توجد كروت بعد.</p>
+  </section>
 
+  <!-- ======================= المعلم: محرر فلاش كارد ======================= -->
+  <section id="screen-teacher-flashcard-editor" class="screen">
+    <button class="btn-back" data-back-to="screen-teacher-flashcards" type="button" aria-label="رجوع">‹ رجوع</button>
+    <header class="topbar">
+      <h1>تعديل الكارد</h1>
+      <button id="btn-delete-flashcard" class="btn btn-danger-ghost btn-sm" type="button">حذف الكارد</button>
+    </header>
+
+    <label class="color-field">
+      لون خلفية الكارد
+      <input id="fc-card-color" type="color" value="#FFFFFF" />
+    </label>
+
+    <div class="fc-toolbar">
+      <button id="fc-btn-bold" class="btn btn-outline btn-sm" type="button"><b>B</b></button>
+      <select id="fc-font-select" class="input fc-select">
+        <option value="Cairo">Cairo</option>
+        <option value="Amiri">Amiri</option>
+      </select>
+      <label class="color-field">
+        لون النص
+        <input id="fc-font-color" type="color" value="#1E2A1F" />
+      </label>
+      <button id="fc-btn-table" class="btn btn-outline btn-sm" type="button">+ جدول</button>
+    </div>
+
+    <div id="fc-content" class="fc-content" contenteditable="true"></div>
+
+    <button id="btn-save-flashcard" class="btn btn-primary btn-block" type="button">حفظ الكارد</button>
+    <p id="flashcard-save-msg" class="field-hint" role="status" hidden></p>
+  </section>
 
   <!-- ======================= المعلم: محرر رسمة (رفع صورة + تغبيش) ======================= -->
   <section id="screen-teacher-lesson-editor" class="screen">
