@@ -150,7 +150,7 @@ async function getLesson(classId, unitId, lessonId) {
     getClasses, getClass, addClass, deleteClass,
     getUnits, getUnit, addUnit, deleteUnit,
     getLessons, getLesson, addLesson, updateLesson, deleteLesson,
-    uploadLessonImage, deleteImage,
+    uploadLessonImage, deleteImage, getAllImages,
     getCodes, generateCode, deleteCode, toggleCode, validateCode,
   };
 })();
