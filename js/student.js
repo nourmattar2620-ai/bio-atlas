@@ -249,6 +249,8 @@ async function openUnit(unitId, unitName) {
     initLoginForm();
     initTeacherLoginLink();
     initResetViewer();
+    initOpenFlashcards();
+    initFlashcardNav();
   }
 
   return { init, enterClasses };
