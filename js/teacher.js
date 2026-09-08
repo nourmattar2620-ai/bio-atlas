@@ -8,6 +8,8 @@ const Teacher = (() => {
     lessonId: null,
     lessonImages: [],
     currentImageId: null,
+    lessonFlashcards: [],
+currentFlashcardId: null,
     labels: [],
     imageFile: null,
     draft: null,
