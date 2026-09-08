@@ -2,7 +2,7 @@
  * Service Worker بسيط
  * يخزّن هيكل التطبيق (الواجهة) مؤقتاً ليعمل عند ضعف الاتصال
  */
-const CACHE_NAME = "bioatlas-shell-v1";
+const CACHE_NAME = "bioatlas-shell-v2";
 const SHELL_FILES = [
   "./",
   "./index.html",
