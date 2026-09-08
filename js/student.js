@@ -210,6 +210,41 @@ async function openUnit(unitId, unitName) {
     document.getElementById("fc-btn-prev").addEventListener("click", () => {
       if (state.fcIndex > 0) {
         state.fcIndex--;
+        renderFlashcard();
+      }
+    });
+    document.getElementById("fc-btn-next").addEventListener("click", () => {
+      if (state.fcIndex < state.lessonFlashcards.length - 1) {
+        state.fcIndex++;
+        renderFlashcard();
+      }
+    });
+
+    // دعم السحب باليد (سوايب) للتنقل بين الكروت
+    const wrap = document.getElementById("fc-viewer-wrap");
+    let touchStartX = null;
+    wrap.addEventListener(
+      "touchstart",
+      (e) => {
+        touchStartX = e.touches[0].clientX;
+      },
+      { passive: true }
+    );
+    wrap.addEventListener("touchend", (e) => {
+      if (touchStartX === null) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 50) {
+        if (dx < 0 && state.fcIndex < state.lessonFlashcards.length - 1) {
+          state.fcIndex++;
+          renderFlashcard();
+        } else if (dx > 0 && state.fcIndex > 0) {
+          state.fcIndex--;
+          renderFlashcard();
+        }
+      }
+      touchStartX = null;
+    });
+  }
   function init() {
     initLoginForm();
     initTeacherLoginLink();
