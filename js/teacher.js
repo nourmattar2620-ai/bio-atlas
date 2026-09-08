@@ -260,6 +260,7 @@ Router.show("screen-teacher-unit");
     try {
       const lesson = await DB.getLesson(state.classId, state.unitId, lessonId);
       state.lessonImages = lesson.images || [];
+      state.lessonFlashcards = lesson.flashcards || [];
       document.getElementById("teacher-lesson-images-title").textContent = lesson.name;
       renderLessonImagesList();
       Router.show("screen-teacher-lesson-images");
