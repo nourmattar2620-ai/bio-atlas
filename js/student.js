@@ -174,7 +174,42 @@ async function openUnit(unitId, unitName) {
       );
     });
   }
+// ===================== الفلاش كارد =====================
+  function initOpenFlashcards() {
+    document.getElementById("btn-open-student-flashcards").addEventListener("click", () => {
+      state.fcIndex = 0;
+      renderFlashcard();
+      Router.show("screen-student-flashcards");
+    });
+  }
 
+  function renderFlashcard() {
+    const cards = state.lessonFlashcards;
+    const empty = document.getElementById("fc-empty");
+    const wrap = document.getElementById("fc-viewer-wrap");
+    const nav = document.querySelector(".fc-nav");
+    const counter = document.getElementById("fc-counter");
+    if (!cards.length) {
+      empty.hidden = false;
+      wrap.hidden = true;
+      nav.classList.add("hidden");
+      counter.textContent = "";
+      return;
+    }
+    empty.hidden = true;
+    wrap.hidden = false;
+    nav.classList.remove("hidden");
+    const card = cards[state.fcIndex];
+    const cardEl = document.getElementById("fc-viewer-card");
+    cardEl.innerHTML = card.html || "";
+    cardEl.style.background = card.color || "#FFFFFF";
+    counter.textContent = `${state.fcIndex + 1} / ${cards.length}`;
+  }
+
+  function initFlashcardNav() {
+    document.getElementById("fc-btn-prev").addEventListener("click", () => {
+      if (state.fcIndex > 0) {
+        state.fcIndex--;
   function init() {
     initLoginForm();
     initTeacherLoginLink();
