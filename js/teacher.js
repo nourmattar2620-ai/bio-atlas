@@ -359,6 +359,130 @@ Router.show("screen-teacher-unit");
       }
     });
   }
+  // ===================== الفلاش كارد =====================
+  function initOpenFlashcardsList() {
+    document.getElementById("btn-open-flashcards").addEventListener("click", () => {
+      renderFlashcardsList();
+      Router.show("screen-teacher-flashcards");
+    });
+  }
+
+  function renderFlashcardsList() {
+    const list = document.getElementById("list-flashcards");
+    list.innerHTML = "";
+    document.getElementById("empty-flashcards").hidden = state.lessonFlashcards.length > 0;
+    state.lessonFlashcards.forEach((card, idx) => {
+      const li = document.createElement("li");
+      li.className = "specimen-item";
+      li.tabIndex = 0;
+      li.style.borderRightColor = card.color || "#3E7C59";
+      const preview = (card.html || "").replace(/<[^>]+>/g, " ").trim().slice(0, 40) || "كارد بدون نص";
+      li.innerHTML = `
+        <div>
+          <div class="specimen-item-title">كارد ${idx + 1}</div>
+          <div class="specimen-item-sub">${Utils.escapeHtml(preview)}</div>
+        </div>
+        <span class="specimen-item-arrow">‹</span>`;
+      li.addEventListener("click", () => openFlashcardEditor(card.id));
+      list.appendChild(li);
+    });
+  }
+
+  function initAddFlashcard() {
+    document.getElementById("btn-add-flashcard").addEventListener("click", async () => {
+      const newCard = { id: Utils.generateId(), html: "", color: "#FFFFFF" };
+      state.lessonFlashcards.push(newCard);
+      UI.showLoading("جارٍ الإضافة…");
+      try {
+        await DB.updateLesson(state.classId, state.unitId, state.lessonId, {
+          flashcards: state.lessonFlashcards,
+        });
+        renderFlashcardsList();
+        openFlashcardEditor(newCard.id);
+      } catch (err) {
+        UI.toast("تعذرت الإضافة: " + err.message, "error");
+        } finally {
+        UI.hideLoading();
+      }
+    });
+  }
+
+  function openFlashcardEditor(cardId) {
+    const card = state.lessonFlashcards.find((c) => c.id === cardId);
+    if (!card) return;
+    state.currentFlashcardId = cardId;
+    document.getElementById("fc-card-color").value = card.color || "#FFFFFF";
+    document.getElementById("fc-content").innerHTML = card.html || "";
+    document.getElementById("flashcard-save-msg").hidden = true;
+    Router.show("screen-teacher-flashcard-editor");
+  }
+
+  function initFlashcardToolbar() {
+    document.getElementById("fc-btn-bold").addEventListener("click", () => {
+      document.getElementById("fc-content").focus();
+      document.execCommand("bold");
+    });
+    document.getElementById("fc-font-select").addEventListener("change", (e) => {
+      document.getElementById("fc-content").focus();
+      document.execCommand("fontName", false, e.target.value);
+    });
+    document.getElementById("fc-font-color").addEventListener("input", (e) => {
+      document.getElementById("fc-content").focus();
+      document.execCommand("foreColor", false, e.target.value);
+    });
+    document.getElementById("fc-btn-table").addEventListener("click", () => {
+      document.getElementById("fc-content").focus();
+      document.execCommand(
+        "insertHTML",
+        false,
+        "<table><tr><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr></table><p><br></p>"
+      );
+    });
+  }
+
+  function initDeleteFlashcard() {
+    document.getElementById("btn-delete-flashcard").addEventListener("click", async () => {
+      const ok = await UI.confirmDialog("حذف الكارد", "سيتم حذف هذا الكارد نهائياً. متابعة؟", "حذف نهائي");
+      if (!ok) return;
+      UI.showLoading("جارٍ الحذف…");
+      try {
+        state.lessonFlashcards = state.lessonFlashcards.filter((c) => c.id !== state.currentFlashcardId);
+        await DB.updateLesson(state.classId, state.unitId, state.lessonId, {
+          flashcards: state.lessonFlashcards,
+        });
+        UI.toast("تم حذف الكارد");
+        renderFlashcardsList();
+        Router.show("screen-teacher-flashcards");
+      } catch (err) {
+        UI.toast("تعذر الحذف: " + err.message, "error");
+      } finally {
+        UI.hideLoading();
+      }
+    });
+  }
+
+  function initSaveFlashcard() {
+    document.getElementById("btn-save-flashcard").addEventListener("click", async () => {
+      UI.showLoading("جارٍ الحفظ…");
+      try {
+        const idx = state.lessonFlashcards.findIndex((c) => c.id === state.currentFlashcardId);
+        if (idx === -1) throw new Error("تعذر إيجاد الكارد");
+        state.lessonFlashcards[idx].html = document.getElementById("fc-content").innerHTML;
+        state.lessonFlashcards[idx].color = document.getElementById("fc-card-color").value;
+        await DB.updateLesson(state.classId, state.unitId, state.lessonId, {
+          flashcards: state.lessonFlashcards,
+        });
+        UI.toast("تم حفظ الكارد بنجاح");
+        const msg = document.getElementById("flashcard-save-msg");
+        msg.textContent = "آخر حفظ: الآن";
+        msg.hidden = false;
+      } catch (err) {
+        UI.toast("تعذر الحفظ: " + err.message, "error");
+      } finally {
+        UI.hideLoading();
+      }
+    });
+  }
   // ===================== محرر رسمة (رفع صورة + تغبيش) =====================
   function openImageEditor(imageId) {
     const image = state.lessonImages.find((x) => x.id === imageId);
