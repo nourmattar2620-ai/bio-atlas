@@ -277,14 +277,46 @@
     <ul id="list-student-lessons" class="specimen-list"></ul>
     <p id="empty-student-lessons" class="empty-state" hidden>لا توجد دروس متاحة حالياً.</p>
   </section>
-
-  <!-- ======================= الطالب: رسومات الدرس (قائمة مصغّرات) ======================= -->
+<!-- ======================= الطالب: رسومات وإضافات الدرس ======================= -->
   <section id="screen-student-lesson-images" class="screen">
     <button class="btn-back" data-back-to="screen-student-lessons" type="button" aria-label="رجوع">‹ رجوع</button>
     <h1 id="student-lesson-images-title">الدرس</h1>
-    <ul id="list-student-lesson-images" class="specimen-list thumb-list"></ul>
-    <p id="empty-student-lesson-images" class="empty-state" hidden>لا توجد رسومات بعد.</p>
+
+    <nav class="section-tabs" role="tablist">
+      <button class="tab active" data-panel="panel-student-drawings" type="button" role="tab">الرسومات</button>
+      <button class="tab" data-panel="panel-student-additions" type="button" role="tab">الإضافات</button>
+    </nav>
+
+    <div id="panel-student-drawings" class="panel active">
+      <ul id="list-student-lesson-images" class="specimen-list thumb-list"></ul>
+      <p id="empty-student-lesson-images" class="empty-state" hidden>لا توجد رسومات بعد.</p>
+    </div>
+
+    <div id="panel-student-additions" class="panel">
+      <ul class="specimen-list">
+        <li class="specimen-item" id="btn-open-student-flashcards">
+          <div class="specimen-item-title">فلاش كارد</div>
+          <span class="specimen-item-arrow">‹</span>
+        </li>
+      </ul>
+    </div>
   </section>
+
+  <!-- ======================= الطالب: عارض الفلاش كارد ======================= -->
+  <section id="screen-student-flashcards" class="screen">
+    <button class="btn-back" data-back-to="screen-student-lesson-images" type="button" aria-label="رجوع">‹ رجوع</button>
+    <h1>فلاش كارد</h1>
+    <p id="fc-counter" class="field-hint"></p>
+    <div id="fc-viewer-wrap" class="fc-viewer-wrap">
+      <div id="fc-viewer-card" class="flashcard"></div>
+    </div>
+    <div class="fc-nav">
+      <button id="fc-btn-prev" class="btn btn-outline" type="button">‹ السابق</button>
+      <button id="fc-btn-next" class="btn btn-outline" type="button">التالي ›</button>
+    </div>
+    <p id="fc-empty" class="empty-state" hidden>لا توجد كروت بعد لهذا الدرس.</p>
+  </section>
+  
 
   <!-- ======================= الطالب: عارض الرسمة ======================= -->
   <section id="screen-student-viewer" class="screen">
