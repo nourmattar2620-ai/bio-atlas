@@ -139,7 +139,46 @@
     <ul id="list-lessons" class="specimen-list"></ul>
     <p id="empty-lessons" class="empty-state" hidden>لا توجد دروس بعد.</p>
   </section>
+<!-- ======================= المعلم: رسومات وإضافات الدرس ======================= -->
+  <section id="screen-teacher-lesson-images" class="screen">
+    <button class="btn-back" data-back-to="screen-teacher-unit" type="button" aria-label="رجوع">‹ رجوع</button>
+    <header class="topbar">
+      <h1 id="teacher-lesson-images-title">الدرس</h1>
+      <button id="btn-delete-lesson" class="btn btn-danger-ghost btn-sm" type="button">حذف الدرس</button>
+    </header>
 
+    <nav class="section-tabs" role="tablist">
+      <button class="tab active" data-panel="panel-teacher-drawings" type="button" role="tab">الرسومات</button>
+      <button class="tab" data-panel="panel-teacher-additions" type="button" role="tab">الإضافات</button>
+    </nav>
+
+    <div id="panel-teacher-drawings" class="panel active">
+      <div class="panel-toolbar">
+        <h2>الرسومات</h2>
+        <button id="btn-add-image" class="btn btn-primary btn-sm" type="button">+ إضافة رسمة</button>
+      </div>
+      <ul id="list-lesson-images" class="specimen-list thumb-list"></ul>
+      <p id="empty-lesson-images" class="empty-state" hidden>لا توجد رسومات بعد.</p>
+    </div>
+
+    <div id="panel-teacher-additions" class="panel">
+      <ul class="specimen-list">
+        <li class="specimen-item" id="btn-open-flashcards">
+          <div class="specimen-item-title">فلاش كارد</div>
+          <span class="specimen-item-arrow">‹</span>
+        </li>
+      </ul>
+      <p class="field-hint">أقسام إضافية أخرى (كالاختبارات) قادمة قريباً.</p>
+    </div>
+  </section>
+
+  <!-- ======================= المعلم: قائمة الفلاش كارد ======================= -->
+  <section id="screen-teacher-flashcards" class="screen">
+    <button class="btn-back" data-back-to="screen-teacher-lesson-images" type="button" aria-label="رجوع">‹ رجوع</button>
+    <header class="topbar">
+      <h1>فلاش كارد</h1>
+    </header>
+    <div class="panel-toolbar">
 
 
   <!-- ======================= المعلم: محرر رسمة (رفع صورة + تغبيش) ======================= -->
