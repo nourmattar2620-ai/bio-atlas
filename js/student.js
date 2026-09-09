@@ -145,15 +145,16 @@ async function openUnit(unitId, unitName) {
     });
     Router.show("screen-student-lesson-images");
   }
-
-  function openViewer(image) {
-  
+function openViewer(image) {
     document.getElementById("student-lesson-title").textContent = image.name || "الرسمة";
     const img = document.getElementById("viewer-image");
     img.src = image.imageURL;
     renderViewerBoxes(image.labels || []);
     Router.show("screen-student-viewer");
-  }
+    const el = document.getElementById("screen-student-viewer");
+    alert("موجود: " + !!el + " | classList: " + (el ? el.className : "غير موجود"));
+}
+  
 
   function renderViewerBoxes(labels) {
     const layer = document.getElementById("viewer-boxes-layer");
