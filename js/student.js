@@ -147,7 +147,7 @@ async function openUnit(unitId, unitName) {
   }
 
   function openViewer(image) {
-    alert("رابط الصورة: " + image.imageURL);
+  
     document.getElementById("student-lesson-title").textContent = image.name || "الرسمة";
     const img = document.getElementById("viewer-image");
     img.src = image.imageURL;
