@@ -2,7 +2,15 @@
  * واجهة الطالب بالكامل
  */
 const Student = (() => {
-  const state = { classId: null, unitId: null, lessonId: null, lessonFlashcards: [], fcIndex: 0 };
+  const state = {
+    classId: null,
+    unitId: null,
+    lessonId: null,
+    lessonFlashcards: [],
+    fcIndex: 0,
+    quizOrder: [],
+    quizIndex: 0,
+  };
 
   function initLoginForm() {
     document.getElementById("form-student-login").addEventListener("submit", async (e) => {
