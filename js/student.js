@@ -253,6 +253,77 @@ async function openUnit(unitId, unitName) {
       touchStartX = null;
     });
   }
+  // ===================== الاختبار العشوائي =====================
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function renderQuizImage() {
+    const item = state.quizOrder[state.quizIndex];
+    document.getElementById("quiz-image").src = item.imageURL;
+    const layer = document.getElementById("quiz-boxes-layer");
+    layer.innerHTML = "";
+    (item.labels || []).forEach((label) => {
+      const el = document.createElement("div");
+      el.className = "label-box";
+      el.style.left = label.xPct + "%";
+      el.style.top = label.yPct + "%";
+      el.style.width = label.wPct + "%";
+      el.style.height = label.hPct + "%";
+      el.style.background = label.color || "#0A0A0A";
+      el.setAttribute("role", "button");
+      el.addEventListener("click", () => {
+        el.classList.toggle("revealed");
+        el.style.background = el.classList.contains("revealed")
+          ? "transparent"
+          : label.color || "#0A0A0A";
+      });
+      layer.appendChild(el);
+    });
+    document.getElementById("quiz-counter").textContent =
+      `${state.quizIndex + 1} / ${state.quizOrder.length}`;
+  }
+
+  function initRandomQuiz() {
+    document.getElementById("btn-open-random-quiz").addEventListener("click", async () => {
+      UI.showLoading("جارٍ تحميل الرسومات…");
+      try {
+        const images = await DB.getAllImages();
+        if (!images.length) {
+          UI.toast("لا توجد رسومات بالتطبيق بعد", "error");
+          return;
+        }
+        state.quizOrder = shuffleArray(images);
+        state.quizIndex = 0;
+        renderQuizImage();
+        Router.show("screen-student-random-quiz");
+      } catch (err) {
+        UI.toast("تعذر تحميل الرسومات: " + err.message, "error");
+      } finally {
+        UI.hideLoading();
+      }
+    });
+
+    document.getElementById("quiz-btn-reset").addEventListener("click", () => {
+      renderQuizImage();
+    });
+    document.getElementById("quiz-btn-prev").addEventListener("click", () => {
+      if (state.quizIndex > 0) {
+        state.quizIndex--;
+        renderQuizImage();
+      }
+    });
+    document.getElementById("quiz-btn-next").addEventListener("click", () => {
+      if (state.quizIndex < state.quizOrder.length - 1) {
+        state.quizIndex++;
+        renderQuizImage();
+      }
+    });
+  }
   function init() {
     initLoginForm();
     initTeacherLoginLink();
