@@ -146,6 +146,20 @@ async function getLesson(classId, unitId, lessonId) {
     return doc.exists && doc.data().active !== false;
   }
 
+  async function getAllImages() {
+    const snap = await db.collectionGroup("lessons").get();
+    const all = [];
+    snap.forEach((doc) => {
+      const data = doc.data();
+      if (Array.isArray(data.images)) {
+        data.images.forEach((img) => {
+          if (img.imageURL) all.push(img);
+        });
+      }
+    });
+    return all;
+  }
+
   return {
     getClasses, getClass, addClass, deleteClass,
     getUnits, getUnit, addUnit, deleteUnit,
