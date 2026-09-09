@@ -315,8 +315,21 @@
       <button id="fc-btn-prev" class="btn btn-outline" type="button">‹ السابق</button>
       <button id="fc-btn-next" class="btn btn-outline" type="button">التالي ›</button>
     </div>
-    <p id="fc-empty" class="empty-state" hidden>لا توجد كروت بعد لهذا الدرس.</p>
-  </section>
+ <!-- ======================= الطالب: اختبار عشوائي على كل الرسومات ======================= -->
+  <section id="screen-student-random-quiz" class="screen">
+    <button class="btn-back" data-back-to="screen-student-classes" type="button" aria-label="رجوع">‹ رجوع</button>
+    <h1>اختبار عشوائي</h1>
+    <p id="quiz-counter" class="field-hint"></p>
+    <button id="quiz-btn-reset" class="btn btn-outline btn-sm" type="button">إعادة إخفاء الكل</button>
+    <div id="quiz-image-wrap" class="lesson-image-wrap">
+      <img id="quiz-image" alt="رسمة الاختبار" />
+      <div id="quiz-boxes-layer" class="boxes-layer viewer-mode"></div>
+    </div>
+    <div class="fc-nav">
+      <button id="quiz-btn-prev" class="btn btn-outline" type="button">‹ السابق</button>
+      <button id="quiz-btn-next" class="btn btn-outline" type="button">التالي ›</button>
+    </div>
+  </section> 
   
 
   <!-- ======================= الطالب: عارض الرسمة ======================= -->
