@@ -330,6 +330,7 @@ async function openUnit(unitId, unitName) {
     initResetViewer();
     initOpenFlashcards();
     initFlashcardNav();
+    initRandomQuiz();
   }
 
   return { init, enterClasses };
