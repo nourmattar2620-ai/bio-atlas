@@ -151,10 +151,7 @@ function openViewer(image) {
     img.src = image.imageURL;
     renderViewerBoxes(image.labels || []);
     Router.show("screen-student-viewer");
-    const el = document.getElementById("screen-student-viewer");
-    alert("موجود: " + !!el + " | classList: " + (el ? el.className : "غير موجود"));
 }
-  
 
   function renderViewerBoxes(labels) {
     const layer = document.getElementById("viewer-boxes-layer");
